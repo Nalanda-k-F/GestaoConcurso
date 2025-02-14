@@ -13,7 +13,6 @@ namespace GestaoConcurso.Controllers
             _context = context;
         }
 
-
         // Métodos 
         public async Task Add(Concurso concurso)
         {
