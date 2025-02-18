@@ -23,6 +23,13 @@ namespace GestaoConcurso.Controllers
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<IActionResult> EditarCidade(int id)
+        {
+            var cidade = await _context.Cidade.FindAsync(id);
+            if (cidade == null) return NotFound();
+
+            return View(cidade);
+        }
         public async Task<ActionResult<List<Cidade>>> ListarCidades()
         {
             var cidade = await _context.Cidade.ToListAsync();

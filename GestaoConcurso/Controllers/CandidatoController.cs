@@ -23,6 +23,13 @@ namespace GestaoConcurso.Controllers
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<IActionResult> EditarCandidato(int id)
+        {
+            var candidato = await _context.Candidato.FindAsync(id);
+            if (candidato == null) return NotFound();
+
+            return View(candidato);
+        }
         public async Task<ActionResult<List<Candidato>>> ListarTodos()
         {
             var candidatos = await _context.Candidato.ToListAsync();
