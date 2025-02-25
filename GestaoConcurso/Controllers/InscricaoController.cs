@@ -49,13 +49,13 @@ namespace GestaoConcurso.Controllers
         }
         public async Task<IActionResult> Atualizar(int id, [FromBody] Inscricao inscricaoAtualizado)
         {
-            var inscricao = await _context.Candidato.FindAsync(id);
+            var inscricao = await _context.Inscricao.FindAsync(id);
 
             if (inscricao == null)
                 return NotFound("Inscrição não encontrada.");
 
             // Atualiza os campos necessários
-            inscricao.DataIncricao = inscricaoAtualizado.Nome;
+            inscricao.DataInscricao = inscricaoAtualizado.DataInscricao;
             
             await _context.SaveChangesAsync();
             return Ok("Inscrição atualizada com sucesso.");
