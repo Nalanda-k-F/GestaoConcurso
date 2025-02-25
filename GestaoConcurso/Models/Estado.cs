@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GestaoConcurso.Models
@@ -12,16 +13,19 @@ namespace GestaoConcurso.Models
 
         [Column("nome")]
         [MaxLength(45)] 
-        public string? Nome { get; set; }
+        public string Nome { get; set; }
 
         [Column("regiao")]
         [MaxLength(45)]
-        public string? Regiao { get; set; }
+        public string Regiao { get; set; }
 
-        [Column("uf")]
-        [MaxLength(2)] // UF sempre tem 2 caracteres (exemplo: SP, RJ, MG)
-        public string? Uf { get; set; }
+        [Column("uf")] 
+        [MaxLength(2)]
+        public string UF { get; set; }
 
         public List<Cidade> Cidades { get; set; }
     }
+
 }
+
+

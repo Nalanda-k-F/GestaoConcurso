@@ -10,7 +10,7 @@ namespace GestaoConcurso.Models
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("Nota")]
+        [Column(TypeName = "decimal(5, 2)")] 
         public decimal? Nota { get; set; }
 
         [Required]

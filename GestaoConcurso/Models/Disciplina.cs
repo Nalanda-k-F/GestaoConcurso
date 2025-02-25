@@ -10,9 +10,10 @@ namespace GestaoConcurso.Models
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("Disciplina")]
-        public string? Disciplina_ { get; set; }
+        [Column("Disciplina")] 
+        public string? NomeDisc { get; set; } 
 
         public List<ConcursoDisciplina> ConcursosDisciplinas { get; set; }
+    
     }
 }

@@ -37,6 +37,6 @@ namespace GestaoConcurso.Models
         public int CidadeId { get; set; }
 
         [ForeignKey(nameof(CidadeId))]
-        public Cidade? Cidade{ get; set; }
+        public Cidade Cidade { get; set; }
     }
 }

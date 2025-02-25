@@ -10,15 +10,18 @@ namespace GestaoConcurso.Models
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("municipio")]
-        [MaxLength(45)] 
-        public string? Municipio { get; set; }
+        [Column("municipio")] 
+        [MaxLength(45)]
+        public string Municipio { get; set; } 
+
 
         [Required]
         [Column("EstadoId")] 
         public int EstadoId { get; set; }
 
         [ForeignKey(nameof(EstadoId))]
-        public Estado? Estado { get; set; } 
+        public Estado Estado { get; set; }
+
+        
     }
 }

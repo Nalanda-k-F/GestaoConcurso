@@ -19,6 +19,7 @@ namespace GestaoConcurso.Contexto
         public DbSet<Inscricao>Inscricao { get; set; }
         public DbSet<Pontuacao>Pontuacao { get; set; }
 
-    
+        
+
     }
 }

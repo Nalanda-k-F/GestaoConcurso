@@ -27,6 +27,25 @@ options.UseMySql(mySqlConexao, ServerVersion.AutoDetect(mySqlConexao)));
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ContextoBD>();
+    await context.Database.MigrateAsync(); // Aplica migrações
+
+    if (!context.Estado.Any())
+    {
+        var estadoController = services.GetRequiredService<EstadoController>();
+        await estadoController.AdicionarEstados();
+    }
+    if (!context.Cidade.Any())
+    {
+        var cidadeController = services.GetRequiredService<CidadeController>();
+        await cidadeController.AdicionarCidades();
+    }
+}
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -36,6 +55,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 
 app.UseStaticFiles();
 app.UseAntiforgery();
