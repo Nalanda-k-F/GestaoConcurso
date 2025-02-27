@@ -18,41 +18,33 @@ namespace GestaoConcurso.Controllers
         public async Task Add(Concurso concurso)
         {
             await _context.Concurso.AddAsync(concurso);
+            await _context.SaveChangesAsync(); 
         }
-        public async Task Salvar()
+
+
+        public async Task<List<Concurso>> ListarConcurso()
         {
-            await _context.SaveChangesAsync();
+            return await _context.Concurso.ToListAsync();
         }
 
-        public async Task<IActionResult> Listar()
+        // Retorna um concurso específico
+        public async Task<Concurso?> BuscarPorId(int id)
         {
-            var concursos = await _context.Concurso.ToListAsync();
-            return View(concursos);
+            return await _context.Concurso.FindAsync(id);
         }
-        // Exibe a página de edição de um concurso específico
-        public async Task<IActionResult> Editar(int id)
+
+        public async Task Editar(Concurso concursoAtualizado)
         {
-            var concurso = await _context.Concurso.FindAsync(id);
-            if (concurso == null) return NotFound();
+            var concursoExistente = await _context.Concurso.FindAsync(concursoAtualizado.Id);
+            if (concursoExistente != null)
+            {
+                // Atualiza as propriedades do concurso existente com os valores do concurso atualizado
+                concursoExistente.Edital = concursoAtualizado.Edital;
+                concursoExistente.DataConcurso = concursoAtualizado.DataConcurso;
 
-            return View(concurso);
+                _context.Concurso.Update(concursoExistente);
+                await _context.SaveChangesAsync();
+            }
         }
-
-        // Atualiza um concurso
-        public async Task<IActionResult> Atualizar(int id, string edital, DateTime dataConcurso)
-        {
-            var concurso = await _context.Concurso.FindAsync(id);
-            if (concurso == null) return NotFound();
-
-            concurso.Edital = edital;
-            concurso.DataConcurso = dataConcurso;
-
-            _context.Concurso.Update(concurso);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Listar));
-        }
-
-
-
     }
 }

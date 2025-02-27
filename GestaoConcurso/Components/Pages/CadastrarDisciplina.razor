@@ -1,0 +1,87 @@
+﻿@page "/cadastroDisciplina"
+@using GestaoConcurso.Models
+@using GestaoConcurso.Controllers
+@inject DisciplinaController disciplinaControl
+@inject ConcursoController concursoControl
+@inject ConcursoDisciplinaController ConcursoDisciplinaControl
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Cadastrar Disciplinas</h3>
+
+<div class="form-group">
+    <label>Concurso:</label>
+    <select class="form-control" @bind="concursoId">
+        <option value="">Selecione um concurso</option>
+        @if (concursos != null)
+        {
+            @foreach (var concurso in concursos)
+            {
+                <option value="@concurso.Id">@concurso.Edital</option>
+            }
+        }
+    </select>
+</div>
+
+<div class="form-group">
+    <label>Disciplina:</label>
+    <input type="text" class="form-control" @bind="novaDisciplinaNome" />
+</div>
+
+<button class="btn btn-primary" @onclick="AdicionarDisciplina">Adicionar Disciplina</button>
+
+@if (disciplinasAdicionadas.Any())
+{
+    <h4>Disciplinas Adicionadas:</h4>
+    <ul>
+        @foreach (var disciplina in disciplinasAdicionadas)
+        {
+            <li>@disciplina.NomeDisc</li>
+        }
+    </ul>
+    <button class="btn btn-success" @onclick="SalvarDisciplinas">Salvar Disciplinas</button>
+}
+
+@code {
+    private int concursoId;
+    private string novaDisciplinaNome;
+    private List<Disciplina> disciplinasAdicionadas = new List<Disciplina>();
+    private List<Concurso> concursos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        concursos = await concursoControl.ListarConcurso();
+    }
+
+    private void AdicionarDisciplina()
+    {
+        if (!string.IsNullOrWhiteSpace(novaDisciplinaNome))
+        {
+            disciplinasAdicionadas.Add(new Disciplina { NomeDisc = novaDisciplinaNome });
+            novaDisciplinaNome = string.Empty;
+        }
+    }
+
+    private async Task SalvarDisciplinas()
+    {
+        if (concursoId > 0 && disciplinasAdicionadas.Any())
+        {
+            foreach (var disciplina in disciplinasAdicionadas)
+            {
+                await disciplinaControl.Add(disciplina);
+                await disciplinaControl.Salvar();
+
+                await ConcursoDisciplinaControl.Add(new ConcursoDisciplina
+                    {
+                        ConcursoId = concursoId,
+                        DisciplinaId = disciplina.Id,
+                        DataRegistro = DateTime.Now
+                    });
+                await ConcursoDisciplinaControl.Salvar();
+            }
+
+            disciplinasAdicionadas.Clear();
+            NavigationManager.NavigateTo("/cadastroDisciplina"); // Recarrega a página ou navega para outra página
+        }
+    }
+}
