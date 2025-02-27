@@ -10,42 +10,56 @@
 <h3 class="text-center" style="color: black; font-weight: bold;">Cadastrar Disciplinas</h3>
 
 
-<div class="form-group">
-    <label>Concurso:</label>
-    <select class="form-control" @bind="concursoId">
-        <option value="">Selecione um concurso</option>
-        @if (concursos != null)
-        {
-            @foreach (var concurso in concursos)
+
+<div class="d-flex justify-content-center">
+    <div style="width: 70%;">
+<EditForm Model="@novaDisciplina" OnValidSubmit="AdicionarDisciplina" class="p-4 border rounded shadow-lg bg-light">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Concurso:</label>
+        <select class="form-control" @bind="concursoId">
+            <option value="">Selecione um Edital</option>
+            @if (concursos != null)
             {
-                <option value="@concurso.Id">@concurso.Edital</option>
+                @foreach (var concurso in concursos)
+                {
+                    <option value="@concurso.Id">@concurso.Edital</option>
+                }
             }
-        }
-    </select>
+        </select>
+    </div>
+    <div class="form-group">
+       <label>Disciplina:</label>
+       <InputText @bind-Value="novaDisciplina.NomeDisc" class="form-control" />
+       <ValidationMessage For="@(() => novaDisciplina.NomeDisc)" />
+    </div>
+    <button type="submit" class="btn custom-button  mt-2" style="background-color: #3CB371;color: white;">
+      Adicionar Disciplina
+    </button>
+            @if (disciplinasAdicionadas.Any())
+            {
+                <h4>Disciplinas Adicionadas:</h4>
+                <ul>
+                    @foreach (var disciplina in disciplinasAdicionadas)
+                    {
+                        <li>@disciplina.NomeDisc</li>
+                    }
+                </ul>
+                <button class="btn custom-button" @onclick="SalvarDisciplinas" style="background-color:#FF6347;color: white;" >Salvar Disciplinas</button>
+            }
+  
+           
+</EditForm>
+</div>
 </div>
 
-<div class="form-group">
-    <label>Disciplina:</label>
-    <input type="text" class="form-control" @bind="novaDisciplinaNome" />
-</div>
 
-<button class="btn btn-primary" @onclick="AdicionarDisciplina">Adicionar Disciplina</button>
 
-@if (disciplinasAdicionadas.Any())
-{
-    <h4>Disciplinas Adicionadas:</h4>
-    <ul>
-        @foreach (var disciplina in disciplinasAdicionadas)
-        {
-            <li>@disciplina.NomeDisc</li>
-        }
-    </ul>
-    <button class="btn btn-success" @onclick="SalvarDisciplinas">Salvar Disciplinas</button>
-}
 
 @code {
     private int concursoId;
-    private string novaDisciplinaNome;
+    private Disciplina novaDisciplina = new Disciplina();
     private List<Disciplina> disciplinasAdicionadas = new List<Disciplina>();
     private List<Concurso> concursos;
 
@@ -56,10 +70,10 @@
 
     private void AdicionarDisciplina()
     {
-        if (!string.IsNullOrWhiteSpace(novaDisciplinaNome))
+        if (!string.IsNullOrWhiteSpace(novaDisciplina.NomeDisc))
         {
-            disciplinasAdicionadas.Add(new Disciplina { NomeDisc = novaDisciplinaNome });
-            novaDisciplinaNome = string.Empty;
+            disciplinasAdicionadas.Add(new Disciplina { NomeDisc = novaDisciplina.NomeDisc });
+            novaDisciplina = new Disciplina(); // Reset para um novo formulário
         }
     }
 
@@ -82,7 +96,7 @@
             }
 
             disciplinasAdicionadas.Clear();
-            NavigationManager.NavigateTo("/cadastroDisciplina"); // Recarrega a página ou navega para outra página
+            NavigationManager.NavigateTo("/cadastroDisciplina", forceLoad: true); // Recarrega a página
         }
     }
 }
