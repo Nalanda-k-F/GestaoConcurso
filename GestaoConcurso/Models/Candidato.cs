@@ -22,6 +22,6 @@ namespace GestaoConcurso.Models
         [StringLength(11, MinimumLength = 11, ErrorMessage = "CPF deve ter 11 dígitos.")]
         public string Cpf { get; set; } = string.Empty;
 
-        public Endereco Endereco { get; set; } = new Endereco();
+        public Endereco? Endereco { get; set; }
     }
 }

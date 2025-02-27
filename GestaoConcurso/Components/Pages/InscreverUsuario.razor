@@ -7,224 +7,204 @@
 @inject EnderecoController enderecoControl
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
-@inject IWebHostEnvironment env
 
-<h3>Cadastro de Candidato</h3>
+<h3 class="text-center" style="color: black; font-weight: bold;">Cadastro de Candidato</h3>
 
-<EditForm Model="@candidato" OnValidSubmit="@SalvarCandidato" FormName="FormName">
-    <DataAnnotationsValidator />
+<div class="d-flex justify-content-center">
+    <div style="width: 70%;">
+        <EditForm Model="@candidato" OnValidSubmit="Salvar" class="p-4 border rounded shadow-lg bg-light">
+            <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label for="nome">Nome:</label>
-        <InputText id="nome" @bind-Value="candidato.Nome" class="form-control" />
-        <ValidationMessage For="@(() => candidato.Nome)" />
-    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nome">Nome:<span class="text-danger">*</span></label>
+                    <InputText id="nome" @bind-Value="candidato.Nome" class="form-control" placeholder="Digite seu nome" />
+                    <ValidationMessage For="@(() => candidato.Nome)" />
+                </div>
 
-    <div class="form-group">
-        <label for="cpf">CPF:</label>
-        <InputText id="cpf" @bind-Value="candidato.Cpf" class="form-control" />
-        <ValidationMessage For="@(() => candidato.Cpf)" />
-    </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cpf">CPF:<span class="text-danger">*</span></label>
+                    <InputText id="cpf" @bind-Value="candidato.Cpf" class="form-control" placeholder="Digite seu CPF" />
+                    <ValidationMessage For="@(() => candidato.Cpf)" class="text-danger" />
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label for="estado">Estado:</label>
-        <select id="estado" class="form-control" @onchange="AtualizarEstadoSelecionado">
-            <option value="">Selecione um Estado</option>
-            @foreach (var item in estados)
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="estado">Estado:<span class="text-danger">*</span></label>
+                    <select id="estado" class="form-control" @onchange="AtualizarEstadoSelecionado">
+                        <option value="">Selecione um Estado</option>
+                        @foreach (var item in estados)
+                        {
+                            <option value="@item.Id">@item.Nome (@item.UF)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="cidade">Cidade:<span class="text-danger">*</span></label>
+                    <select id="cidade" class="form-control" @onchange="AtualizarCidadeSelecionada" disabled="@(cidadesFiltradas.Count == 0)">
+                        <option value="">Selecione a Cidade</option>
+                        @foreach (var cidadeItem in cidadesFiltradas)
+                        {
+                            <option value="@cidadeItem.Id">@cidadeItem.Municipio</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="rua">Rua:</label>
+                    <InputText id="rua" @bind-Value="endereco.Rua" class="form-control" placeholder="Digite a rua" />
+                    <ValidationMessage For="@(() => endereco.Rua)" class="text-danger" />
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="numero">Número:</label>
+                    <InputText id="numero" @bind-Value="endereco.Numero" class="form-control" placeholder="Número" />
+                    <ValidationMessage For="@(() => endereco.Numero)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="bairro">Bairro:</label>
+                    <InputText id="bairro" @bind-Value="endereco.Bairro" class="form-control" placeholder="Bairro" />
+                    <ValidationMessage For="@(() => endereco.Bairro)"/>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="complemento">Complemento:</label>
+                    <InputText id="complemento" @bind-Value="endereco.Complemento" class="form-control" placeholder="Complemento" />
+                    <ValidationMessage For="@(() => endereco.Complemento)"/>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(mensagemErro))
             {
-                <option value="@item.Id">@item.Nome (@item.UF)</option>
+                <div class="alert alert-danger text-center">@mensagemErro</div>
             }
-        </select>
-    </div>
 
-    <div class="form-group">
-        <label for="cidade">Cidade:</label>
-        <select id="cidade" class="form-control" @bind="cidadeIdSelecionada" disabled="@(cidadesFiltradas.Count == 0)">
-            <option value="">Selecione a Cidade</option>
-            @foreach (var cidadeItem in cidadesFiltradas)
+            @if (!string.IsNullOrEmpty(mensagemSucesso))
             {
-                <option value="@cidadeItem.Id">@cidadeItem.Municipio</option>
+                <div class="alert alert-success text-center">@mensagemSucesso</div>
             }
-        </select>
-    </div>
 
-    <div class="form-group">
-        <label for="rua">Rua:</label>
-        <InputText id="rua" @bind-Value="endereco.Rua" class="form-control" />
-        <ValidationMessage For="@(() => endereco.Rua)" />
+            <div class="d-flex justify-content-center gap-3">
+                <button type="submit" class="btn" style="background-color: #3CB371;color: white;">
+                    Salvar
+                    </button>
+                <button type="button" class="btn" style="background-color: #DC143C;color: white" @onclick="CancelarCadastro">
+                    Cancelar
+                </button>
+            </div>
+        </EditForm>
     </div>
+</div>
 
-    <div class="form-group">
-        <label for="numero">Número:</label>
-        <InputText id="numero" @bind-Value="endereco.Numero" class="form-control" />
-        <ValidationMessage For="@(() => endereco.Numero)" />
-    </div>
-
-    <div class="form-group">
-        <label for="bairro">Bairro:</label>
-        <InputText id="bairro" @bind-Value="endereco.Bairro" class="form-control" />
-        <ValidationMessage For="@(() => endereco.Bairro)" />
-    </div>
-
-    <div class="form-group">
-        <label for="complemento">Complemento:</label>
-        <InputText id="complemento" @bind-Value="endereco.Complemento" class="form-control" />
-        <ValidationMessage For="@(() => endereco.Complemento)" />
-    </div>
-
-    @if (!string.IsNullOrEmpty(mensagemErro))
-    {
-        <div class="alert alert-danger">
-            @mensagemErro
-        </div>
+<style>
+    
+    .form-group {
+        margin-bottom: 15px;
     }
 
-    <button type="submit" class="btn btn-primary" disabled="@carregandoCidades || @salvandoCandidato">Salvar</button>
-    <button type="button" class="btn btn-secondary" @onclick="CancelarCadastro">Cancelar</button>
+    .text-danger {
+        color: red;
+    }
+</style>
 
-
-</EditForm>
-
-@if (carregandoCidades)
-{
-    <div class="spinner-border" role="status">
-        <span class="sr-only">Carregando...</span>
-    </div>
-}
 
 @code {
     public Candidato candidato = new();
     public Endereco endereco = new();
     public List<Estado> estados = new();
-
+    public List<Cidade> cidadesFiltradas = new();
     private string mensagemErro;
-    public int cidadeIdSelecionada { get; set; }
-
-    public List<Cidade> cidadesFiltradas = new List<Cidade>();
-    private List<Cidade> todasCidades = new List<Cidade>();
-
+    private string mensagemSucesso;
+    public int EstadoSelecionado;
+    public int cidadeIdSelecionada;
     private bool carregandoCidades = false;
-    private bool salvandoCandidato = false;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             estados = await estadoControl.ListarEstados();
-            Console.WriteLine($"Total de Estados carregadas: {estados.Count}");
         }
         catch (Exception ex)
         {
             mensagemErro = $"Erro ao carregar dados: {ex.Message}";
+            EsconderMensagens();
         }
     }
-
-    public int EstadoSelecionado;
 
     public async Task AtualizarEstadoSelecionado(ChangeEventArgs e)
     {
-        Console.WriteLine($"AtualizarEstadoSelecionado chamado. Valor de e.Value: {e.Value}");
-
         if (int.TryParse(e.Value.ToString(), out int estadoId))
         {
             EstadoSelecionado = estadoId;
-            Console.WriteLine($"EstadoSelecionado: {EstadoSelecionado}");
-            await OnEstadoSelecionado();
-        }
-        else
-        {
-            Console.WriteLine($"Erro ao converter e.Value para inteiro: {e.Value}");
+            cidadesFiltradas = await cidadeControl.ListarTodasCidades(EstadoSelecionado);
+            StateHasChanged();
         }
     }
 
-    private async Task OnEstadoSelecionado()
+    public void AtualizarCidadeSelecionada(ChangeEventArgs e)
     {
-        if (carregandoCidades)
-        {
-            Console.WriteLine("OnEstadoSelecionado chamado, mas já está carregando cidades. Saindo...");
-            return;
-        }
+        int.TryParse(e.Value.ToString(), out cidadeIdSelecionada);
+    }
 
-        carregandoCidades = true;
+    private async Task Salvar()
+    {
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
         try
         {
-            Console.WriteLine($"OnEstadoSelecionado chamado. EstadoSelecionado: {EstadoSelecionado}");
-
-            if (EstadoSelecionado > 0)
+            var resultadoCandidato = await candidatoControl.Add(candidato);
+            if (resultadoCandidato != null && resultadoCandidato.Id > 0)
             {
-                Console.WriteLine($"Chamando ListarTodasCidades com EstadoSelecionado: {EstadoSelecionado}");
-                // Removido o uso de todasCidades
-                cidadesFiltradas = await cidadeControl.ListarTodasCidades(EstadoSelecionado);
-
-                Console.WriteLine($"ListarTodasCidades retornou {cidadesFiltradas.Count} cidades.");
+                endereco.CandidatoId = resultadoCandidato.Id;
+                endereco.CidadeId = cidadeIdSelecionada;
+                await enderecoControl.Add(endereco);
+                mensagemSucesso = "Cadastro realizado com sucesso!";
+                EsconderMensagens(true);
             }
             else
             {
-                cidadesFiltradas = new List<Cidade>();
-                Console.WriteLine("EstadoSelecionado é 0. cidadesFiltradas definido como uma lista vazia.");
+                mensagemErro = "Erro ao salvar o candidato.";
+                EsconderMensagens();
             }
-
-            StateHasChanged();
-            Console.WriteLine("StateHasChanged chamado.");
-        }
-        catch (Exception ex)
-        {
-            mensagemErro = $"Erro ao carregar cidades: {ex.Message}";
-            Console.WriteLine($"Erro ao carregar cidades: {ex.Message}");
-        }
-        finally
-        {
-            carregandoCidades = false;
-        }
-    }
-
-    private async Task SalvarCandidato()
-    {
-        if (string.IsNullOrWhiteSpace(candidato.Nome) || string.IsNullOrWhiteSpace(candidato.Cpf))
-        {
-            mensagemErro = "Preencha todos os campos obrigatórios!";
-            return;
-        }
-
-        
-
-        salvandoCandidato = true;
-        try
-        {
-            // Adiciona o candidato
-            var resultadoCandidato = await candidatoControl.Add(candidato);
-            candidato = resultadoCandidato;
-
-            // Adiciona o endereço
-            endereco.CandidatoId = candidato.Id;
-            endereco.CidadeId = cidadeIdSelecionada;
-            var resultadoEndereco = await enderecoControl.Add(endereco);
-
-            NavigationManager.NavigateTo("/");
         }
         catch (Exception ex)
         {
             mensagemErro = $"Erro ao salvar: {ex.Message}";
-            Console.WriteLine($"Erro ao salvar: {ex.Message}");
-        }
-        finally
-        {
-            salvandoCandidato = false;
+            EsconderMensagens();
         }
     }
 
     private void CancelarCadastro()
     {
+        ResetarFormulario();
+        NavigationManager.NavigateTo("/cadastro", true);
+    }
+
+    private void ResetarFormulario()
+    {
         candidato = new();
         endereco = new();
         cidadeIdSelecionada = 0;
-        cidadesFiltradas = new List<Cidade>();
+        cidadesFiltradas.Clear();
         EstadoSelecionado = 0;
+    }
 
-        // Limpa mensagens de erro
+    private async void EsconderMensagens(bool limparCampos = false)
+    {
+        await Task.Delay(3000);
         mensagemErro = string.Empty;
-
-        // Redireciona para a página de cadastro (força um refresh)
-        NavigationManager.NavigateTo("/cadastro", true);
+        mensagemSucesso = string.Empty;
+        if (limparCampos)
+        {
+            ResetarFormulario();
+        }
+        StateHasChanged();
     }
 }

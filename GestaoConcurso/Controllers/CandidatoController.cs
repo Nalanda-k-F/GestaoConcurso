@@ -26,7 +26,7 @@ namespace GestaoConcurso.Controllers
                 // Gera o próximo número de inscrição
                 candidato.NumeroInsc = await GerarProximoNumeroInscricao();
 
-                // Adiciona o candidato ao banco de dados
+                
                 _context.Candidato.Add(candidato);
                 await _context.SaveChangesAsync();
 
@@ -34,9 +34,9 @@ namespace GestaoConcurso.Controllers
             }
             catch (Exception ex)
             {
-                // Log do erro
+                
                 Console.WriteLine($"Erro ao adicionar candidato: {ex.Message}");
-                throw; // Re-lança a exceção para ser tratada em um nível superior
+                throw; 
             }
         }
 
@@ -47,27 +47,23 @@ namespace GestaoConcurso.Controllers
             {
                 try
                 {
-                    // Obtém o último número de inscrição
+                    // Obtém o último número de inscrição usado
                     var ultimoCandidato = await _context.Candidato
                         .OrderByDescending(c => c.NumeroInsc)
                         .FirstOrDefaultAsync();
 
+                    // Calcula o próximo número de inscrição
                     int novoNumeroInsc = ultimoCandidato?.NumeroInsc + 1 ?? 1;
 
-                    // Cria um candidato "fantasma" para garantir que o número seja único
-                    var novoCandidato = new Candidato { NumeroInsc = novoNumeroInsc };
-
-                    _context.Candidato.Add(novoCandidato); // Adiciona o candidato fantasma
-                    await _context.SaveChangesAsync(); // Salva no banco de dados
-
-                    _context.Candidato.Remove(novoCandidato); // Remove o candidato fantasma
-                    await _context.SaveChangesAsync(); // Salva as alterações
-
-                    return novoNumeroInsc; // Retorna o número gerado
+                    // Verifica se o número já existe no banco de dados
+                    if (!await _context.Candidato.AnyAsync(c => c.NumeroInsc == novoNumeroInsc))
+                    {
+                        return novoNumeroInsc; 
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    // Conflito! Tentar novamente
+                    // Lida com exceções de concorrência, se necessário
                     continue;
                 }
             }
@@ -110,13 +106,12 @@ namespace GestaoConcurso.Controllers
             // Atualiza as propriedades do candidato
             candidato.Nome = candidatoAtualizado.Nome;
             candidato.Cpf = candidatoAtualizado.Cpf;
-            // ... atualize outras propriedades conforme necessário
-
+           
             await _context.SaveChangesAsync();
         }
 
         // Método para verificar se um candidato existe
-        private bool CandidatoExiste(int id)
+        public bool CandidatoExiste(int id)
         {
             return _context.Candidato.Any(e => e.Id == id);
         }
