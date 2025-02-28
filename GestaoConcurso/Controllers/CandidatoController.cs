@@ -40,6 +40,11 @@ namespace GestaoConcurso.Controllers
             }
         }
 
+        public async Task Salvar()
+        {
+            await _context.SaveChangesAsync();
+        }
+
         // Método para gerar o próximo número de inscrição
         private async Task<int> GerarProximoNumeroInscricao()
         {

@@ -21,6 +21,11 @@ namespace GestaoConcurso.Controllers
             await _context.SaveChangesAsync(); 
         }
 
+        public async Task Salvar()
+        {
+            await _context.SaveChangesAsync();
+        }
+
 
         public async Task<List<Concurso>> ListarConcurso()
         {

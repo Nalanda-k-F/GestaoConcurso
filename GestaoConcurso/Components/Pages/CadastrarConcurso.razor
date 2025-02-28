@@ -2,12 +2,50 @@
 @using GestaoConcurso.Models
 @using GestaoConcurso.Controllers
 @inject ConcursoController concursoControl
+@inject DisciplinaController disciplinaControl
+@inject ConcursoDisciplinaController ConcursoDisciplinaControl
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
-<h3 class="text-center" style="color: black; font-weight: bold;">Cadastrar Concurso</h3>
+<h3 class="text-center" style="color: black; font-weight: bold;">Cadastrar Concursos</h3>
 
 
+
+<div class="d-flex justify-content-center">
+    <div style="width: 70%;">
+        <EditForm Model="@novoConcurso" OnValidSubmit="AdicionarConcurso" class="p-4 border rounded shadow-lg bg-light">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label>Edital:</label>
+                <InputText @bind-Value="novoConcurso.Edital" class="form-control" />
+                <ValidationMessage For="@(() => novoConcurso.Edital)" />
+            </div>
+
+            <div class="form-group">
+                <label>Data do Concurso:</label>
+                <InputDate @bind-Value="novoConcurso.DataConcurso" class="form-control" />
+                <ValidationMessage For="@(() => novoConcurso.DataConcurso)" />
+            </div>
+
+            <button type="submit" class="btn custom-button mt-2" style="background-color: #3CB371; color: white;">
+                Adicionar Concurso
+            </button>
+        </EditForm>
+    </div>
+</div>
 
 @code {
-   
+    private Concurso novoConcurso = new Concurso();
+
+    private async Task AdicionarConcurso()
+    {
+        if (!string.IsNullOrWhiteSpace(novoConcurso.Edital) && novoConcurso.DataConcurso != default)
+        {
+            await concursoControl.Add(novoConcurso);
+            await concursoControl.Salvar();
+
+            NavigationManager.NavigateTo("/cadastroConcurso", forceLoad: true); // Redireciona após salvar
+        }
+    }
 }
