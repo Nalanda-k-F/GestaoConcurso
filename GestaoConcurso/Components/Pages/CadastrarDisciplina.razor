@@ -9,34 +9,41 @@
 
 <h3 class="text-center" style="color: black; font-weight: bold;">Cadastrar Disciplinas</h3>
 
-
-
 <div class="d-flex justify-content-center">
     <div style="width: 70%;">
-<EditForm Model="@novaDisciplina" OnValidSubmit="AdicionarDisciplina" class="p-4 border rounded shadow-lg bg-light">
-    <DataAnnotationsValidator />
+        <EditForm Model="@novaDisciplina" OnValidSubmit="AdicionarDisciplina" class="p-4 border rounded shadow-lg bg-light">
+            <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label>Concurso:</label>
-        <select class="form-control" @bind="concursoId">
-            <option value="">Selecione um Edital</option>
-            @if (concursos != null)
+            <div class="form-group">
+                <label>Concurso:</label>
+                <select class="form-control" @bind="concursoId">
+                    <option value="">Selecione um Edital</option>
+                    @if (concursos != null)
+                    {
+                        @foreach (var concurso in concursos)
+                        {
+                            <option value="@concurso.Id">@concurso.Edital</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Disciplina:</label>
+                <InputText @bind-Value="novaDisciplina.NomeDisc" class="form-control" />
+                <ValidationMessage For="@(() => novaDisciplina.NomeDisc)" />
+            </div>
+            <button type="submit" class="btn custom-button mt-2" style="background-color: #3CB371;color: white;">
+                Adicionar Disciplina
+            </button>
+            @if (!string.IsNullOrEmpty(mensagemErro))
             {
-                @foreach (var concurso in concursos)
-                {
-                    <option value="@concurso.Id">@concurso.Edital</option>
-                }
+                <div class="alert alert-danger text-center">@mensagemErro</div>
             }
-        </select>
-    </div>
-    <div class="form-group">
-       <label>Disciplina:</label>
-       <InputText @bind-Value="novaDisciplina.NomeDisc" class="form-control" />
-       <ValidationMessage For="@(() => novaDisciplina.NomeDisc)" />
-    </div>
-    <button type="submit" class="btn custom-button  mt-2" style="background-color: #3CB371;color: white;">
-      Adicionar Disciplina
-    </button>
+
+            @if (!string.IsNullOrEmpty(mensagemSucesso))
+            {
+                <div class="alert alert-success text-center">@mensagemSucesso</div>
+            }
             @if (disciplinasAdicionadas.Any())
             {
                 <h4>Disciplinas Adicionadas:</h4>
@@ -46,22 +53,22 @@
                         <li>@disciplina.NomeDisc</li>
                     }
                 </ul>
-                <button class="btn custom-button" @onclick="SalvarDisciplinas" style="background-color:#FF6347;color: white;" >Salvar Disciplinas</button>
+                <button class="btn custom-button" @onclick="SalvarDisciplinas" style="background-color:#FF6347;color: white;">Salvar Disciplinas</button>
+
+              
             }
-  
-           
-</EditForm>
+            
+        </EditForm>
+    </div>
 </div>
-</div>
-
-
-
 
 @code {
     private int concursoId;
     private Disciplina novaDisciplina = new Disciplina();
     private List<Disciplina> disciplinasAdicionadas = new List<Disciplina>();
     private List<Concurso> concursos;
+    private string mensagemErro;
+    private string mensagemSucesso;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,7 +80,7 @@
         if (!string.IsNullOrWhiteSpace(novaDisciplina.NomeDisc))
         {
             disciplinasAdicionadas.Add(new Disciplina { NomeDisc = novaDisciplina.NomeDisc });
-            novaDisciplina = new Disciplina(); // Reset para um novo formulário
+            novaDisciplina = new Disciplina(); 
         }
     }
 
@@ -94,9 +101,32 @@
                     });
                 await ConcursoDisciplinaControl.Salvar();
             }
-
-            disciplinasAdicionadas.Clear();
-            NavigationManager.NavigateTo("/cadastroDisciplina", forceLoad: true); // Recarrega a página
+            mensagemSucesso = "Cadastro realizado com sucesso!";
+            EsconderMensagens(true);
+                  }
+        else
+        {
+            mensagemErro = "Erro ao salvar o candidato.";
+            EsconderMensagens();
         }
+    }
+
+    private void ResetarFormulario()
+    {
+        concursoId = 0; 
+        novaDisciplina = new Disciplina(); 
+        disciplinasAdicionadas.Clear(); 
+    }
+
+    private async void EsconderMensagens(bool limparCampos = false)
+    {
+        await Task.Delay(3000);
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        if (limparCampos)
+        {
+            ResetarFormulario();
+        }
+        StateHasChanged();
     }
 }

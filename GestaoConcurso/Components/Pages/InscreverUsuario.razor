@@ -4,7 +4,9 @@
 @inject CandidatoController candidatoControl
 @inject EstadoController estadoControl
 @inject CidadeController cidadeControl
+@inject ConcursoController concursoControl
 @inject EnderecoController enderecoControl
+@inject InscricaoController inscricaoControl
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
@@ -80,6 +82,20 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label>Concurso:</label>
+                <select class="form-control" @bind="concursoId">
+                    <option value="">Selecione um Edital</option>
+                    @if (concursos != null)
+                    {
+                        @foreach (var concurso in concursos)
+                        {
+                            <option value="@concurso.Id">@concurso.Edital</option>
+                        }
+                    }
+                </select>
+            </div>
+
             @if (!string.IsNullOrEmpty(mensagemErro))
             {
                 <div class="alert alert-danger text-center">@mensagemErro</div>
@@ -124,12 +140,17 @@
     public int EstadoSelecionado;
     public int cidadeIdSelecionada;
     private bool carregandoCidades = false;
+    private int concursoId;
+    private List<Concurso> concursos;
+    public Inscricao inscricao = new Inscricao();
+
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             estados = await estadoControl.ListarEstados();
+            concursos = await concursoControl.ListarConcurso();
         }
         catch (Exception ex)
         {
@@ -165,7 +186,13 @@
                 endereco.CandidatoId = resultadoCandidato.Id;
                 endereco.CidadeId = cidadeIdSelecionada;
                 await enderecoControl.Add(endereco);
-                mensagemSucesso = "Cadastro realizado com sucesso!";
+                // Criar a inscrição
+                inscricao.CandidatoId = resultadoCandidato.Id;
+                inscricao.ConcursoId = concursoId;
+                inscricao.DataInscricao = DateTime.Now; // Defina a data de inscrição
+                await inscricaoControl.Add(inscricao); // Adicione a inscrição
+
+                mensagemSucesso = "Cadastro e inscrição realizados com sucesso!";
                 EsconderMensagens(true);
             }
             else

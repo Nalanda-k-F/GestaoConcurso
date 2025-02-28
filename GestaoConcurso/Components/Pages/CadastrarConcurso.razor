@@ -9,8 +9,6 @@
 
 <h3 class="text-center" style="color: black; font-weight: bold;">Cadastrar Concursos</h3>
 
-
-
 <div class="d-flex justify-content-center">
     <div style="width: 70%;">
         <EditForm Model="@novoConcurso" OnValidSubmit="AdicionarConcurso" class="p-4 border rounded shadow-lg bg-light">
@@ -31,12 +29,23 @@
             <button type="submit" class="btn custom-button mt-2" style="background-color: #3CB371; color: white;">
                 Adicionar Concurso
             </button>
+            @if (!string.IsNullOrEmpty(mensagemErro))
+            {
+                <div class="alert alert-danger text-center">@mensagemErro</div>
+            }
+
+            @if (!string.IsNullOrEmpty(mensagemSucesso))
+            {
+                <div class="alert alert-success text-center">@mensagemSucesso</div>
+            }
         </EditForm>
     </div>
 </div>
 
 @code {
     private Concurso novoConcurso = new Concurso();
+    private string mensagemErro;
+    private string mensagemSucesso;
 
     private async Task AdicionarConcurso()
     {
@@ -44,8 +53,30 @@
         {
             await concursoControl.Add(novoConcurso);
             await concursoControl.Salvar();
-
-            NavigationManager.NavigateTo("/cadastroConcurso", forceLoad: true); // Redireciona após salvar
+            mensagemSucesso = "Cadastro realizado com sucesso!";
+            EsconderMensagens(true);
         }
+        else
+        {
+            mensagemErro = "Erro ao salvar o concurso.";
+            EsconderMensagens();
+        }
+    }
+
+    private void ResetarFormulario()
+    {
+        novoConcurso = new Concurso();
+    }
+
+    private async void EsconderMensagens(bool limparCampos = false)
+    {
+        await Task.Delay(3000);
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        if (limparCampos)
+        {
+            ResetarFormulario();
+        }
+        StateHasChanged();
     }
 }

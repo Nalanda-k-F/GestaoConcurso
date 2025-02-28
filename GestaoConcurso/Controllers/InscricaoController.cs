@@ -19,11 +19,9 @@ namespace GestaoConcurso.Controllers
         public async Task Add(Inscricao inscricao)
         {
             await _context.Inscricao.AddAsync(inscricao);
-        }
-        public async Task Salvar()
-        {
             await _context.SaveChangesAsync();
         }
+        
         public async Task<ActionResult<List<Inscricao>>> ListarInscricao()
         {
             var inscricao = await _context.Inscricao.ToListAsync();
