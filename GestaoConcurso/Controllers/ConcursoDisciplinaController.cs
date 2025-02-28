@@ -24,6 +24,23 @@ namespace GestaoConcurso.Controllers
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<ConcursoDisciplina>> ListarConcursoDisciplinasPorConcurso(int concursoId)
+        {
+            var disciplinas = await _context.ConcursoDisciplina
+                .Where(cd => cd.ConcursoId == concursoId)
+                .Include(cd => cd.Disciplina)
+                .ToListAsync();
+
+            foreach (var disciplina in disciplinas)
+            {
+                Console.WriteLine($"ConcursoDisciplinaId: {disciplina.Id}, DisciplinaId: {disciplina.DisciplinaId}, DisciplinaNome: {disciplina.Disciplina?.NomeDisc}");
+            }
+
+            return disciplinas;
+        }
+
+
         public async Task<IActionResult> EditarConcursoDisciplina(int id)
         {
             var concursoDisciplina = await _context.ConcursoDisciplina.FindAsync(id);
@@ -31,10 +48,9 @@ namespace GestaoConcurso.Controllers
 
             return View(concursoDisciplina);
         }
-        public async Task<ActionResult<List<ConcursoDisciplina>>> ListarConcursoDisciplina()
+        public async Task<List<ConcursoDisciplina>> ListarConcursoDisciplinas()
         {
-            var concursoDisciplina = await _context.ConcursoDisciplina.ToListAsync();
-            return Ok(concursoDisciplina);
+            return await _context.ConcursoDisciplina.Include(cd => cd.Disciplina).ToListAsync();
         }
         public async Task<ActionResult<ConcursoDisciplina>> BuscarConcursoDisciplinaId(int id)
         {

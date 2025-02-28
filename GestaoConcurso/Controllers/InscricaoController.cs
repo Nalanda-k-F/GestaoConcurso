@@ -14,18 +14,35 @@ namespace GestaoConcurso.Controllers
             _context = context;
         }
 
-        // resolvendo
-        // Métodos 
+       
         public async Task Add(Inscricao inscricao)
         {
             await _context.Inscricao.AddAsync(inscricao);
             await _context.SaveChangesAsync();
         }
-        
-        public async Task<ActionResult<List<Inscricao>>> ListarInscricao()
+
+
+        public async Task<List<Inscricao>> ListarInscricao()
         {
-            var inscricao = await _context.Inscricao.ToListAsync();
-            return Ok(inscricao);
+            return await _context.Inscricao.ToListAsync();
+        }
+        //
+        public async Task<List<Inscricao>> ListarInscricaoPorConcurso(int concursoId)
+        {
+            var inscricoes = await _context.Inscricao
+                .Where(i => i.ConcursoId == concursoId)
+                .Select(i => new Inscricao
+                {
+                    Id = i.Id,
+                    DataInscricao = i.DataInscricao,
+                    ConcursoId = i.ConcursoId, // Adicione esta linha
+                    Candidato = new Candidato { Nome = i.Candidato.Nome }
+                })
+                .ToListAsync();
+
+            Console.WriteLine($"Inscrições encontradas para ConcursoId {concursoId}: {inscricoes.Count}"); // Log adicionado
+
+            return inscricoes;
         }
         //
         public async Task<ActionResult<Inscricao>> BuscarInscricaoId(int id)

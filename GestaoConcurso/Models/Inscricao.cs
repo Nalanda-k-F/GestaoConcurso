@@ -18,14 +18,14 @@ namespace GestaoConcurso.Models
         public int CandidatoId { get; set; }
 
         [ForeignKey(nameof(CandidatoId))]
-        public Candidato? Candidato { get; set; }
+        public Candidato Candidato { get; set; }
 
         [Required]
         [Column("ConcursoId")]
         public int ConcursoId { get; set; }
 
         [ForeignKey(nameof(ConcursoId))]
-        public Concurso? Concurso { get; set; }
+        public Concurso Concurso { get; set; }
 
         public List<Pontuacao> Pontuacoes { get; set; }
     }

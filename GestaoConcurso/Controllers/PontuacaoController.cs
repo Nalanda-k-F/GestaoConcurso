@@ -19,15 +19,21 @@ namespace GestaoConcurso.Controllers
         public async Task Add(Pontuacao pontuacao)
         {
             await _context.Pontuacao.AddAsync(pontuacao);
+            await _context.SaveChangesAsync();
         }
         public async Task Salvar()
         {
             await _context.SaveChangesAsync();
         }
+
         public async Task<ActionResult<List<Pontuacao>>> ListarPontuacao()
         {
             var pontuacao = await _context.Pontuacao.ToListAsync();
             return Ok(pontuacao);
+        }
+        public async Task<Pontuacao> ObterPontuacaoPorInscricaoEConcursoDisciplina(int inscricaoId, int concursoDisciplinaId)
+        {
+            return await _context.Pontuacao.FirstOrDefaultAsync(p => p.InscricaoId == inscricaoId && p.ConcursoDisciplinaId == concursoDisciplinaId);
         }
         //
         public async Task<ActionResult<Pontuacao>> BuscarPontuacaoId(int id)
@@ -60,6 +66,9 @@ namespace GestaoConcurso.Controllers
             await _context.SaveChangesAsync();
             return Ok("Pontuação atualizada com sucesso.");
         }
+
+
     }
+
    
 }
