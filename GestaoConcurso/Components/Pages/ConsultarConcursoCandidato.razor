@@ -1,0 +1,108 @@
+﻿@page "/consultarConcursoCandidato"
+@using GestaoConcurso.Models
+@using GestaoConcurso.Controllers
+@inject ConcursoDisciplinaController concursoDisciplinaControl
+@inject InscricaoController inscricaoControl
+@inject ConcursoController concursoControl
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h3 class="text-center mb-4" style="color: black; font-weight: bold;">Consultar Inscrições em Concursos</h3>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-4 border rounded shadow-lg bg-light">
+                <div class="form-group">
+                    <label>CPF do Candidato:</label>
+                    <input type="text" class="form-control" @bind="cpfCandidato" @bind:event="oninput" />
+                </div>
+
+                <button class="btn mt-4" style="background-color: #3CB371;color: white;" @onclick="IniciarConsulta">Consultar</button>
+
+                @if (!string.IsNullOrEmpty(mensagemErro))
+                {
+                    <div class="alert alert-danger mt-3">@mensagemErro</div>
+                }
+
+                @if (concursosInscritos != null && concursosInscritos.Any())
+                {
+                    <h4 class="mt-4">Concursos Inscritos:</h4>
+                    <ul>
+                        @foreach (var concurso in concursosInscritos)
+                        {
+                            <li>@concurso.Edital</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string cpfCandidato;
+    private List<Concurso> concursosInscritos;
+    private string mensagemErro;
+
+    private async Task IniciarConsulta()
+    {
+        mensagemErro = string.Empty;
+        concursosInscritos = new List<Concurso>();
+
+        if (string.IsNullOrEmpty(cpfCandidato))
+        {
+            ExibirMensagemErro("Por favor, insira o CPF do candidato.");
+            return;
+        }
+
+        await ConsultarInscricoes();
+    }
+
+    private async Task ConsultarInscricoes()
+    {
+        try
+        {
+            var inscricoes = await inscricaoControl.ListarInscricoesPorCpf(cpfCandidato);
+
+            if (inscricoes == null || !inscricoes.Any())
+            {
+                ExibirMensagemErro("CPF não encontrado ou candidato não inscrito em nenhum concurso.");
+                cpfCandidato = string.Empty; // Limpa o campo de entrada
+                return;
+            }
+
+            foreach (var inscricao in inscricoes)
+            {
+                var concurso = await concursoControl.BuscarPorId(inscricao.ConcursoId);
+                if (concurso != null)
+                {
+                    concursosInscritos.Add(concurso);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ExibirMensagemErro($"Erro ao consultar inscrições: {ex.Message}");
+            cpfCandidato = string.Empty; // Limpa o campo de entrada
+        }
+
+        cpfCandidato = string.Empty; // Limpa o campo de entrada após a consulta
+    }
+
+    private void ExibirMensagemErro(string mensagem)
+    {
+        mensagemErro = mensagem;
+        _ = EsconderMensagens();
+    }
+
+    private async Task EsconderMensagens()
+    {
+        await Task.Delay(2000);
+        await InvokeAsync(() =>
+        {
+            mensagemErro = string.Empty;
+            StateHasChanged();
+        });
+    }
+}

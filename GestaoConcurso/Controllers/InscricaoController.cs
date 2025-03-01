@@ -54,6 +54,13 @@ namespace GestaoConcurso.Controllers
 
             return Ok(inscricao);
         }
+        public async Task<List<Inscricao>> ListarInscricoesPorCpf(string cpf)
+        {
+            return await _context.Inscricao
+                .Where(i => i.Candidato.Cpf == cpf)
+                .Include(i => i.Candidato)
+                .ToListAsync();
+        }
         //
         public async Task<IActionResult> EditarInscricao(int id)
         {
