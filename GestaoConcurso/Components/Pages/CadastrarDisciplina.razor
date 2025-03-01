@@ -83,27 +83,62 @@
             novaDisciplina = new Disciplina(); 
         }
     }
+    //
 
     private async Task SalvarDisciplinas()
     {
         if (concursoId > 0 && disciplinasAdicionadas.Any())
         {
+            List<string> disciplinasDuplicadas = new List<string>(); // Lista para armazenar disciplinas duplicadas
+            List<Disciplina> disciplinasParaAdicionar = new List<Disciplina>(); // Lista para armazenar disciplinas que serão adicionadas
+
             foreach (var disciplina in disciplinasAdicionadas)
             {
-                await disciplinaControl.Add(disciplina);
-                await disciplinaControl.Salvar();
+                try
+                {
+                    await disciplinaControl.Add(disciplina);
+                    await disciplinaControl.Salvar();
 
-                await ConcursoDisciplinaControl.Add(new ConcursoDisciplina
+                    await ConcursoDisciplinaControl.Add(new ConcursoDisciplina
+                        {
+                            ConcursoId = concursoId,
+                            DisciplinaId = disciplina.Id,
+                            DataRegistro = DateTime.Now
+                        });
+                    await ConcursoDisciplinaControl.Salvar();
+
+                    disciplinasParaAdicionar.Add(disciplina); // Adiciona a disciplina à lista de disciplinas para adicionar
+                }
+                catch (Exception ex)
+                {
+                    if (ex.Message == "Disciplina com este nome já cadastrada para este concurso.")
                     {
-                        ConcursoId = concursoId,
-                        DisciplinaId = disciplina.Id,
-                        DataRegistro = DateTime.Now
-                    });
-                await ConcursoDisciplinaControl.Salvar();
+                        disciplinasDuplicadas.Add(disciplina.NomeDisc); // Adiciona o nome da disciplina duplicada à lista
+                    }
+                    else
+                    {
+                        mensagemErro = $"Erro ao salvar: {ex.Message}";
+                        EsconderMensagens();
+                        return; // Interrompe o loop se houver um erro
+                    }
+                }
             }
-            mensagemSucesso = "Cadastro realizado com sucesso!";
-            EsconderMensagens(true);
-                  }
+
+            if (disciplinasDuplicadas.Any())
+            {
+                mensagemErro = $"As seguintes disciplinas já estão cadastradas para este concurso: {string.Join(", ", disciplinasDuplicadas)}.";
+                EsconderMensagens();
+
+                // Remove as disciplinas duplicadas da lista disciplinasAdicionadas
+                disciplinasAdicionadas = disciplinasAdicionadas.Where(d => !disciplinasDuplicadas.Contains(d.NomeDisc)).ToList();
+            }
+            else
+            {
+                mensagemSucesso = "Cadastro realizado com sucesso!";
+                EsconderMensagens(true);
+                disciplinasAdicionadas = disciplinasParaAdicionar;
+            }
+        }
         else
         {
             mensagemErro = "Erro ao salvar o candidato.";
@@ -111,6 +146,7 @@
         }
     }
 
+    //
     private void ResetarFormulario()
     {
         concursoId = 0; 
@@ -120,7 +156,7 @@
 
     private async void EsconderMensagens(bool limparCampos = false)
     {
-        await Task.Delay(3000);
+        await Task.Delay(10000);
         mensagemErro = string.Empty;
         mensagemSucesso = string.Empty;
         if (limparCampos)

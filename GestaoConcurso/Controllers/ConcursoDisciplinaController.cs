@@ -18,6 +18,22 @@ namespace GestaoConcurso.Controllers
         // Métodos 
         public async Task Add(ConcursoDisciplina concursoDisciplina)
         {
+            // Obtém a disciplina pelo ID
+            var disciplina = await _context.Disciplina.FindAsync(concursoDisciplina.DisciplinaId);
+
+            if (disciplina == null)
+            {
+                throw new Exception("Disciplina não encontrada.");
+            }
+
+            // Verifica se já existe uma disciplina com o mesmo nome para o mesmo concurso
+            if (await _context.ConcursoDisciplina
+                .Include(cd => cd.Disciplina)
+                .AnyAsync(cd => cd.ConcursoId == concursoDisciplina.ConcursoId && cd.Disciplina.NomeDisc == disciplina.NomeDisc))
+            {
+                throw new Exception("Disciplina com este nome já cadastrada para este concurso.");
+            }
+
             await _context.ConcursoDisciplina.AddAsync(concursoDisciplina);
         }
         public async Task Salvar()

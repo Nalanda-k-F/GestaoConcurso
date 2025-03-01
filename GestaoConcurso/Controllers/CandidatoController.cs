@@ -23,20 +23,24 @@ namespace GestaoConcurso.Controllers
 
             try
             {
-                // Gera o próximo número de inscrição
-                candidato.NumeroInsc = await GerarProximoNumeroInscricao();
+                // Verifica se já existe um candidato com o mesmo CPF
+                if (await _context.Candidato.AnyAsync(c => c.Cpf == candidato.Cpf))
+                {
+                    throw new Exception("CPF já cadastrado.");
+                }
 
                 
+                candidato.NumeroInsc = await GerarProximoNumeroInscricao();
+
                 _context.Candidato.Add(candidato);
                 await _context.SaveChangesAsync();
 
-                return candidato; // Retorna o candidato com o ID gerado
+                return candidato; 
             }
             catch (Exception ex)
             {
-                
                 Console.WriteLine($"Erro ao adicionar candidato: {ex.Message}");
-                throw; 
+                throw;
             }
         }
 

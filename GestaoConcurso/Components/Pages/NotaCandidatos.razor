@@ -9,7 +9,8 @@
 @rendermode InteractiveServer
 
 <div class="container mt-4">
-    <h3 class="text-center mb-4">Lançamento de Notas dos Candidatos</h3>
+
+    <h3 class="text-center mb-4" style="color: black; font-weight: bold;">Lançamento de Notas dos Candidatos</h3>
 
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -62,9 +63,16 @@
                                     <tbody>
                                         @foreach (var candidato in candidatos)
                                         {
-                                            <tr>
+                                            <tr style="@(candidato.TemNotasCadastradas ? "background-color: #90EE90;" : "")">
                                                 <td>
-                                                    <button type="button" class="btn btn-link" style="text-decoration: none; color: red;" @onclick="() => CarregarDisciplinas(candidato.Id)">@candidato.Candidato.Nome</button>
+                                                    @if (candidato.TemNotasCadastradas)
+                                                    {
+                                                        <span>@candidato.Candidato.Nome</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="btn btn-link" style="text-decoration: none; color: red;" @onclick="() => CarregarDisciplinas(candidato.Id)">@candidato.Candidato.Nome</button>
+                                                    }
                                                 </td>
                                             </tr>
                                         }
@@ -109,9 +117,11 @@
 
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn me-2" style="background-color: #3CB371;color: white;">Salvar Notas</button>
-                        <button type="button" class="btn " style="background-color: #DC143C;color: white" @onclick="ResetarFormulario">Limpar</button>
                     </div>
                 }
+                <div class="d-flex justify-content-center">
+                    <button type="button" class="btn" style="background-color: #DC143C;color: white" @onclick="ResetarFormulario">Limpar</button>
+                </div>
             </EditForm>
         </div>
     </div>
@@ -144,9 +154,23 @@
     {
         candidatos = await inscricaoControl.ListarInscricaoPorConcurso(concursoSelecionadoId);
         Console.WriteLine($"Candidatos carregados: {candidatos?.Count}");
+
+        if (candidatos != null)
+        {
+            foreach (var candidato in candidatos)
+            {
+                candidato.TemNotasCadastradas = await VerificarNotasCadastradas(candidato.Id);
+            }
+        }
+
         disciplinas = null;
     }
 
+    private async Task<bool> VerificarNotasCadastradas(int inscricaoId)
+    {
+        var pontuacoes = await pontuacaoControl.ObterPontuacoesPorInscricao(inscricaoId);
+        return pontuacoes != null && pontuacoes.Any();
+    }
     private async Task CarregarDisciplinas(int candidatoId)
     {
         candidatoSelecionadoId = candidatoId;
@@ -215,7 +239,7 @@
         disciplinas = null;
         candidatos = null;
         notas.Clear();
-       
+        NavigationManager.NavigateTo("/lancamentoNotas", forceLoad: true);
         StateHasChanged();
     }
 

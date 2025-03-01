@@ -66,9 +66,15 @@ namespace GestaoConcurso.Controllers
             await _context.SaveChangesAsync();
             return Ok("Pontuação atualizada com sucesso.");
         }
+        public async Task<List<Pontuacao>> ObterPontuacoesPorInscricao(int inscricaoId)
+        {
+            return await _context.Pontuacao
+                .Where(p => p.InscricaoId == inscricaoId)
+                .ToListAsync();
+        }
 
 
     }
 
-   
+
 }

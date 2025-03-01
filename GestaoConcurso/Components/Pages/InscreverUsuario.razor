@@ -221,6 +221,8 @@
         cidadeIdSelecionada = 0;
         cidadesFiltradas.Clear();
         EstadoSelecionado = 0;
+        NavigationManager.NavigateTo("/lancamentoNotas", forceLoad: true);
+        StateHasChanged();
     }
 
     private async void EsconderMensagens(bool limparCampos = false)

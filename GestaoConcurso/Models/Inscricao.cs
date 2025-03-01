@@ -28,5 +28,9 @@ namespace GestaoConcurso.Models
         public Concurso Concurso { get; set; }
 
         public List<Pontuacao> Pontuacoes { get; set; }
+
+        [NotMapped]
+        public bool TemNotasCadastradas { get; set; }
+
     }
 }
