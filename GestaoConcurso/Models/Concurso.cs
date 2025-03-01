@@ -14,7 +14,7 @@ namespace GestaoConcurso.Models
         public string? Edital { get; set; }
 
         [Column("DataConcurso")]
-        public DateTime? DataConcurso { get; set; } 
+        public DateOnly? DataConcurso { get; set; } 
 
         public List<ConcursoDisciplina> ConcursosDisciplinas { get; set; }
         public List<Inscricao> Inscricoes { get; set; }

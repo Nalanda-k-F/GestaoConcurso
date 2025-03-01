@@ -1,11 +1,20 @@
 ﻿@page "/consultarConcursoCandidato"
 @using GestaoConcurso.Models
 @using GestaoConcurso.Controllers
+@using GestaoConcurso.Utilitarios
+@inject RelatorioInscricao relatorioInscricao
 @inject ConcursoDisciplinaController concursoDisciplinaControl
 @inject InscricaoController inscricaoControl
 @inject ConcursoController concursoControl
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 @rendermode InteractiveServer
+
+<script>
+    function NovaGuia(url) {
+        window.open(url, '_blank');
+    }
+</script>
 
 <div class="container mt-4">
     <h3 class="text-center mb-4" style="color: black; font-weight: bold;">Consultar Inscrições em Concursos</h3>
@@ -19,6 +28,12 @@
                 </div>
 
                 <button class="btn mt-4" style="background-color: #3CB371;color: white;" @onclick="IniciarConsulta">Consultar</button>
+
+                @if (concursosInscritos != null && concursosInscritos.Any())
+                {
+                    <button class="btn btn-primary mt-4" @onclick="ImprimirSelecionado">Imprimir</button>
+                }
+
 
                 @if (!string.IsNullOrEmpty(mensagemErro))
                 {
@@ -59,6 +74,8 @@
         await ConsultarInscricoes();
     }
 
+    private Candidato candidatoSelecionado; // Adicione esta linha na seção @code
+
     private async Task ConsultarInscricoes()
     {
         try
@@ -68,9 +85,13 @@
             if (inscricoes == null || !inscricoes.Any())
             {
                 ExibirMensagemErro("CPF não encontrado ou candidato não inscrito em nenhum concurso.");
-                cpfCandidato = string.Empty; // Limpa o campo de entrada
+                cpfCandidato = string.Empty;
                 return;
             }
+
+            candidatoSelecionado = inscricoes.FirstOrDefault()?.Candidato; // Armazena o candidato
+
+            concursosInscritos = new List<Concurso>(); // Inicializa a lista aqui
 
             foreach (var inscricao in inscricoes)
             {
@@ -84,11 +105,39 @@
         catch (Exception ex)
         {
             ExibirMensagemErro($"Erro ao consultar inscrições: {ex.Message}");
-            cpfCandidato = string.Empty; // Limpa o campo de entrada
+            cpfCandidato = string.Empty;
+        }
+    }
+    private async Task ImprimirSelecionado()
+    {
+        if (candidatoSelecionado == null)
+        {
+            ExibirMensagemErro("Candidato não encontrado.");
+            return;
         }
 
-        cpfCandidato = string.Empty; // Limpa o campo de entrada após a consulta
+        try
+        {
+            // Lista para armazenar as disciplinas de cada concurso
+            var disciplinasPorConcurso = new List<List<Disciplina>>();
+
+            // Para cada concurso inscrito, busca as disciplinas
+            foreach (var concurso in concursosInscritos)
+            {
+                var disciplinasConcurso = await concursoDisciplinaControl.ListarConcursoDisciplinasPorConcurso(concurso.Id);
+                var disciplinas = disciplinasConcurso.Select(cd => cd.Disciplina).ToList();
+                disciplinasPorConcurso.Add(disciplinas);
+            }
+
+            var relatorioInscricao = new RelatorioInscricao();
+            await relatorioInscricao.GerarImpressao(candidatoSelecionado, concursosInscritos, disciplinasPorConcurso, NavigationManager, jsRuntime);
+        }
+        catch (Exception ex)
+        {
+            ExibirMensagemErro($"Erro ao gerar relatório: {ex.Message}");
+        }
     }
+
 
     private void ExibirMensagemErro(string mensagem)
     {

@@ -2,6 +2,7 @@ using GestaoConcurso.Components;
 using GestaoConcurso.Contexto;
 using Microsoft.EntityFrameworkCore;
 using GestaoConcurso.Controllers;
+using GestaoConcurso.Utilitarios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ builder.Services.AddScoped<EnderecoController>();
 builder.Services.AddScoped<EstadoController>();
 builder.Services.AddScoped<InscricaoController>();
 builder.Services.AddScoped<PontuacaoController>();
+
+builder.Services.AddScoped<RelatorioInscricao>();
 //
 
 string mySqlConexao = builder.Configuration.GetConnectionString("BaseConexaoMySql");
