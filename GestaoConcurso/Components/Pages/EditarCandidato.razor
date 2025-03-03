@@ -134,6 +134,7 @@
         try
         {
             estados = await estadoControl.ListarEstados();
+           
         }
         catch (Exception ex)
         {
@@ -153,23 +154,16 @@
                 candidato = await candidatoControl.BuscarPorCpfOuNome(cpfOuNomeBusca);
                 if (candidato != null && candidato.Id > 0)
                 {
-                    endereco = await enderecoControl.BuscarEnderecoDoCandidato(candidato.Id);
-                    if (endereco != null)
-                    {
-                        EstadoSelecionado = (await cidadeControl.BuscarCidadePorId(endereco.CidadeId)).EstadoId;
-                        cidadeIdSelecionada = endereco.CidadeId;
-                        cidadesFiltradas = await cidadeControl.ListarTodasCidades(EstadoSelecionado);
-                    }
-                    else
-                    {
+                    
                         endereco = new Endereco();
-                    }
+                    
                 }
                 else
                 {
                     mensagemErro = "Candidato não encontrado.";
                     candidato = null;
                     endereco = null;
+                    cidadesFiltradas.Clear();
                 }
             }
             catch (Exception ex)
@@ -183,6 +177,8 @@
         {
             candidato = null;
             endereco = null;
+            cidadesFiltradas.Clear();
+            
         }
         StateHasChanged();
     }
@@ -204,13 +200,29 @@
         try
         {
             endereco.CidadeId = cidadeIdSelecionada;
-            await enderecoControl.AtualizarEndereco(candidato.Id, endereco);
-            mensagemSucesso = "Endereço atualizado com sucesso!";
+
+            if (endereco.Id > 0) 
+            {
+                await enderecoControl.AtualizarEndereco(endereco); 
+                mensagemSucesso = "Endereço atualizado com sucesso!";
+            }
+            else
+            {
+                endereco.CandidatoId = candidato.Id; 
+                await enderecoControl.AtualizarEndereco(endereco); // Adiciona um novo endereço
+                mensagemSucesso = "Endereço adicionado com sucesso!";
+            }
             EsconderMensagens();
+            // Forçar a atualização da interface do usuário
+            StateHasChanged();
+
+           
+
+           
         }
         catch (Exception ex)
         {
-            mensagemErro = $"Erro ao atualizar endereço: {ex.Message}";
+            mensagemErro = $"Erro ao atualizar/adicionar endereço: {ex.Message} - Detalhes: {ex.InnerException?.Message}";
             EsconderMensagens();
         }
     }
@@ -222,6 +234,11 @@
         cpfOuNomeBusca = string.Empty;
         mensagemErro = string.Empty;
         mensagemSucesso = string.Empty;
+        cidadesFiltradas.Clear(); 
+        NavigationManager.NavigateTo("/editar", true);
+        StateHasChanged(); //
+       
+
     }
     private async void EsconderMensagens()
     {
@@ -229,5 +246,7 @@
         mensagemErro = string.Empty;
         mensagemSucesso = string.Empty;
         StateHasChanged();
+
+        NavigationManager.NavigateTo("/editar", true);
     }
  }

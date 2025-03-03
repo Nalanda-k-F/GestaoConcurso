@@ -27,35 +27,35 @@ namespace GestaoConcurso.Controllers
                 _context.Endereco.Add(endereco);
                 await _context.SaveChangesAsync();
 
-                return endereco; 
+                return endereco;
             }
             catch (Exception ex)
             {
-               
+
                 Console.WriteLine($"Erro ao adicionar endereço: {ex.Message}");
-                throw; 
+                throw;
             }
         }
-        
+
 
         public async Task<Endereco> BuscarEnderecoDoCandidato(int candidatoId)
         {
             try
             {
                 return await _context.Endereco
-                        .Include(e => e.Cidade) // Inclui a cidade relacionada
-                        .FirstOrDefaultAsync(e => e.CandidatoId == candidatoId && e.Ativo == 1);
+                    .Include(e => e.Cidade)
+                    .AsNoTracking() 
+                    .FirstOrDefaultAsync(e => e.CandidatoId == candidatoId && e.Ativo == 1);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao buscar endereço: {ex.Message}");
                 throw;
             }
-
         }
 
         // Método para atualizar um endereço
-        public async Task AtualizarEndereco(int candidatoId, Endereco enderecoAtualizado)
+        public async Task AtualizarEndereco(Endereco enderecoAtualizado)
         {
             if (enderecoAtualizado == null)
             {
@@ -64,30 +64,53 @@ namespace GestaoConcurso.Controllers
 
             try
             {
-                // 1. Desativar o endereço antigo (se existir)
-                var enderecoAntigo = await _context.Endereco
-                    .FirstOrDefaultAsync(e => e.CandidatoId == candidatoId && e.Ativo == 1);
-
-                if (enderecoAntigo != null)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    enderecoAntigo.Ativo = 0; // Desativa o endereço antigo
-                    _context.Endereco.Update(enderecoAntigo);
+                    try
+                    {
+                        if (enderecoAtualizado.Id <= 0) // Verifica se é um novo endereço
+                        {
+                            // Buscar o último endereço ativo do candidato
+                            var enderecoAntigo = await _context.Endereco
+                                .Where(e => e.CandidatoId == enderecoAtualizado.CandidatoId && e.Ativo == 1)
+                                .OrderByDescending(e => e.Id)
+                                .FirstOrDefaultAsync();
+
+                            // Desativar o endereço antigo, se existir
+                            if (enderecoAntigo != null)
+                            {
+                                _context.Entry(enderecoAntigo).State = EntityState.Modified;
+                                enderecoAntigo.Ativo = 0;
+                                _context.Endereco.Update(enderecoAntigo);
+                            }
+
+                            // Adicionar o novo endereço
+                            enderecoAtualizado.Ativo = 1;
+                            _context.Endereco.Add(enderecoAtualizado);
+                        }
+                        else
+                        {
+                            // Atualizar endereço existente
+                            _context.Endereco.Update(enderecoAtualizado);
+                        }
+
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Erro ao atualizar/adicionar endereço: {ex.Message} - Detalhes: {ex.InnerException?.Message}");
+                        throw;
+                    }
                 }
-
-                // 2. Ativar o novo endereço
-                enderecoAtualizado.CandidatoId = candidatoId;
-                enderecoAtualizado.Ativo = 1;
-
-                // Adiciona o novo endereço ao banco de dados
-                await _context.Endereco.AddAsync(enderecoAtualizado);
-                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                // Log do erro
-                Console.WriteLine($"Erro ao atualizar endereço: {ex.Message}");
-                throw; // Re-lança a exceção para ser tratada em um nível superior
+                Console.WriteLine($"Erro ao atualizar/adicionar endereço: {ex.Message} - Detalhes: {ex.InnerException?.Message}");
+                throw;
             }
         }
+        //
     }
 }
