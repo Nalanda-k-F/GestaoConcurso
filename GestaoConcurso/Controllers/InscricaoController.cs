@@ -69,6 +69,13 @@ namespace GestaoConcurso.Controllers
 
             return View(inscricao);
         }
+
+        public async Task<Inscricao> ObterInscricaoPorCandidatoEConcurso(int candidatoId, int concursoId)
+        {
+            return await _context.Inscricao
+                .FirstOrDefaultAsync(i => i.CandidatoId == candidatoId && i.ConcursoId == concursoId);
+        }
+
         public async Task<IActionResult> Atualizar(int id, [FromBody] Inscricao inscricaoAtualizado)
         {
             var inscricao = await _context.Inscricao.FindAsync(id);
