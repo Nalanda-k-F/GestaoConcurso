@@ -96,28 +96,8 @@ namespace GestaoConcurso.Controllers
         {
             return await _context.Candidato.ToListAsync();
         }
+       
 
-        // Método para editar um candidato
-        public async Task EditarCandidato(int id, Candidato candidatoAtualizado)
-        {
-            if (id != candidatoAtualizado.Id)
-            {
-                throw new ArgumentException("IDs não correspondem.");
-            }
-
-            var candidato = await _context.Candidato.FindAsync(id);
-
-            if (candidato == null)
-            {
-                throw new KeyNotFoundException($"Candidato com ID {id} não encontrado.");
-            }
-
-            // Atualiza as propriedades do candidato
-            candidato.Nome = candidatoAtualizado.Nome;
-            candidato.Cpf = candidatoAtualizado.Cpf;
-           
-            await _context.SaveChangesAsync();
-        }
 
         // Método para verificar se um candidato existe
         public bool CandidatoExiste(int id)

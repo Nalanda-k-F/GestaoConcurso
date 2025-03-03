@@ -40,8 +40,7 @@ namespace GestaoConcurso.Controllers
                 })
                 .ToListAsync();
 
-            Console.WriteLine($"Inscrições encontradas para ConcursoId {concursoId}: {inscricoes.Count}"); // Log adicionado
-
+          
             return inscricoes;
         }
         //

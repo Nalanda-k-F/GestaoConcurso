@@ -146,15 +146,14 @@
     private async Task OnConcursoSelecionado(ChangeEventArgs e)
     {
         concursoSelecionadoId = int.Parse(e.Value.ToString());
-        Console.WriteLine($"Concurso selecionado ID: {concursoSelecionadoId}");
+       
         await CarregarCandidatos();
     }
 
     private async Task CarregarCandidatos()
     {
         candidatos = await inscricaoControl.ListarInscricaoPorConcurso(concursoSelecionadoId);
-        Console.WriteLine($"Candidatos carregados: {candidatos?.Count}");
-
+      
         if (candidatos != null)
         {
             foreach (var candidato in candidatos)
@@ -174,16 +173,15 @@
     private async Task CarregarDisciplinas(int candidatoId)
     {
         candidatoSelecionadoId = candidatoId;
-        Console.WriteLine($"Candidato selecionado ID: {candidatoSelecionadoId}");
         var inscricao = candidatos.FirstOrDefault(c => c.Id == candidatoSelecionadoId);
         if (inscricao == null)
         {
-            Console.WriteLine("Inscrição não encontrada");
+            
             mensagemErro = "Inscrição não encontrada.";
             EsconderMensagens();
             return;
         }
-        Console.WriteLine($"ConcursoId para disciplinas: {inscricao?.ConcursoId}");
+        
         disciplinas = await concursoDisciplinaControl.ListarConcursoDisciplinasPorConcurso(inscricao.ConcursoId);
 
         notas.Clear();

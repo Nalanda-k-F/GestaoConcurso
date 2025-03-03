@@ -32,7 +32,7 @@ namespace GestaoConcurso.Controllers
             return await _context.Concurso.ToListAsync();
         }
 
-        // Retorna um concurso específico
+        
         public async Task<Concurso?> BuscarPorId(int id)
         {
             return await _context.Concurso.FindAsync(id);
@@ -43,8 +43,7 @@ namespace GestaoConcurso.Controllers
             var concursoExistente = await _context.Concurso.FindAsync(concursoAtualizado.Id);
             if (concursoExistente != null)
             {
-                // Atualiza as propriedades do concurso existente com os valores do concurso atualizado
-                concursoExistente.Edital = concursoAtualizado.Edital;
+                   concursoExistente.Edital = concursoAtualizado.Edital;
                 concursoExistente.DataConcurso = concursoAtualizado.DataConcurso;
 
                 _context.Concurso.Update(concursoExistente);

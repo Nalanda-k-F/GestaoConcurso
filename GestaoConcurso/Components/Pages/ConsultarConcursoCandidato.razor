@@ -74,7 +74,7 @@
         await ConsultarInscricoes();
     }
 
-    private Candidato candidatoSelecionado; // Adicione esta linha na seção @code
+    private Candidato candidatoSelecionado; 
 
     private async Task ConsultarInscricoes()
     {
@@ -89,9 +89,9 @@
                 return;
             }
 
-            candidatoSelecionado = inscricoes.FirstOrDefault()?.Candidato; // Armazena o candidato
+            candidatoSelecionado = inscricoes.FirstOrDefault()?.Candidato; 
 
-            concursosInscritos = new List<Concurso>(); // Inicializa a lista aqui
+            concursosInscritos = new List<Concurso>(); 
 
             foreach (var inscricao in inscricoes)
             {
@@ -118,7 +118,7 @@
 
         try
         {
-            // Lista para armazenar as disciplinas de cada concurso
+            
             var disciplinasPorConcurso = new List<List<Disciplina>>();
 
             // Para cada concurso inscrito, busca as disciplinas

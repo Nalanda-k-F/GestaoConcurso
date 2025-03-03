@@ -13,12 +13,11 @@ namespace GestaoConcurso.Controllers
         {
             _context = context;
         }
-        //
+        
 
         // Métodos 
         public async Task Add(ConcursoDisciplina concursoDisciplina)
         {
-            // Obtém a disciplina pelo ID
             var disciplina = await _context.Disciplina.FindAsync(concursoDisciplina.DisciplinaId);
 
             if (disciplina == null)

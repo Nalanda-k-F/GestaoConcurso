@@ -189,8 +189,8 @@
                 // Criar a inscrição
                 inscricao.CandidatoId = resultadoCandidato.Id;
                 inscricao.ConcursoId = concursoId;
-                inscricao.DataInscricao = DateTime.Now; // Defina a data de inscrição
-                await inscricaoControl.Add(inscricao); // Adicione a inscrição
+                inscricao.DataInscricao = DateTime.Now; 
+                await inscricaoControl.Add(inscricao); 
 
                 mensagemSucesso = "Cadastro e inscrição realizados com sucesso!";
                 EsconderMensagens(true);

@@ -1,0 +1,89 @@
+﻿@page "/candidatoConcurso"
+@using GestaoConcurso.Models
+@using GestaoConcurso.Controllers
+@inject CandidatoController candidatoControl
+@inject ConcursoController concursoControl
+@inject InscricaoController inscricaoControl
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3 class="text-center" style="color: black; font-weight: bold;">Candidato / Concurso</h3>
+
+<div class="d-flex justify-content-center">
+    <div style="width: 70%;">
+        @if (!string.IsNullOrEmpty(mensagemErro))
+        {
+            <div class="alert alert-danger">@mensagemErro</div>
+        }
+        @if (!string.IsNullOrEmpty(mensagemSucesso))
+        {
+            <div class="alert alert-success">@mensagemSucesso</div>
+        }
+        <EditForm Model="@inscricao" OnValidSubmit="Salvar" class="p-4 border rounded shadow-lg bg-light">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="CandidatoId">Candidato</label>
+                <select id="CandidatoId" class="form-control" @bind="inscricao.CandidatoId">
+                    <option value="">Selecione um candidato</option>
+                    @foreach (var candidato in candidatos)
+                    {
+                        <option value="@candidato.Id">@candidato.Nome (@candidato.Cpf)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ConcursoId">Concurso</label>
+                <select id="ConcursoId" class="form-control" @bind="inscricao.ConcursoId">
+                    <option value="">Selecione um concurso</option>
+                    @foreach (var concurso in concursos)
+                    {
+                        <option value="@concurso.Id">@concurso.Edital</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn  m-2" style="background-color: #3CB371;color: white;">Inscrever</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Inscricao inscricao = new Inscricao();
+    private List<Candidato> candidatos = new List<Candidato>();
+    private List<Concurso> concursos = new List<Concurso>();
+    private string mensagemErro = string.Empty;
+    private string mensagemSucesso = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        candidatos = await candidatoControl.ListarCandidatos();
+        concursos = await concursoControl.ListarConcurso();
+    }
+
+    private async Task Salvar()
+    {
+        try
+        {
+            inscricao.DataInscricao = DateTime.Now;
+            await inscricaoControl.Add(inscricao);
+            mensagemSucesso = "Inscrição realizada com sucesso!";
+            inscricao = new Inscricao();
+            EsconderMensagens();
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Erro ao realizar inscrição: {ex.Message}";
+            EsconderMensagens();
+        }
+    }
+
+    private async void EsconderMensagens()
+    {
+        await Task.Delay(3000);
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        StateHasChanged();
+    }
+}

@@ -27,14 +27,31 @@ namespace GestaoConcurso.Controllers
                 _context.Endereco.Add(endereco);
                 await _context.SaveChangesAsync();
 
-                return endereco; // Retorna o endereço com o ID gerado
+                return endereco; 
             }
             catch (Exception ex)
             {
-                // Log do erro
+               
                 Console.WriteLine($"Erro ao adicionar endereço: {ex.Message}");
-                throw; // Re-lança a exceção para ser tratada em um nível superior
+                throw; 
             }
+        }
+        
+
+        public async Task<Endereco> BuscarEnderecoDoCandidato(int candidatoId)
+        {
+            try
+            {
+                return await _context.Endereco
+                        .Include(e => e.Cidade) // Inclui a cidade relacionada
+                        .FirstOrDefaultAsync(e => e.CandidatoId == candidatoId && e.Ativo == 1);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar endereço: {ex.Message}");
+                throw;
+            }
+
         }
 
         // Método para atualizar um endereço

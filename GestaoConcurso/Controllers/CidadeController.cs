@@ -277,7 +277,7 @@ new Cidade { Id = 189, Municipio = "Miracema do Tocantins", EstadoId = 27 }
         try
         {
             var cidades = await _context.Cidade
-                .Include(c => c.Estado) // Inclui a propriedade de navegação Estado
+                .Include(c => c.Estado) 
                 .Where(c => c.EstadoId == estadoId)
                 .ToListAsync();
 
@@ -321,7 +321,7 @@ new Cidade { Id = 189, Municipio = "Miracema do Tocantins", EstadoId = 27 }
         }
 
         var cidades = await _context.Cidade
-            .Include(c => c.Estado) // Inclui a propriedade de navegação Estado
+            .Include(c => c.Estado) 
             .Where(c => c.Municipio.Contains(nome))
             .ToListAsync();
 
