@@ -22,6 +22,7 @@ builder.Services.AddScoped<InscricaoController>();
 builder.Services.AddScoped<PontuacaoController>();
 
 builder.Services.AddScoped<RelatorioInscricao>();
+builder.Services.AddScoped<RelatorioNotas>();
 //
 
 string mySqlConexao = builder.Configuration.GetConnectionString("BaseConexaoMySql");

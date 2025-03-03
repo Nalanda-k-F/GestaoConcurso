@@ -27,11 +27,11 @@
                     <input type="text" class="form-control" @bind="cpfCandidato" @bind:event="oninput" />
                 </div>
 
-                <button class="btn mt-4" style="background-color: #3CB371;color: white;" @onclick="IniciarConsulta">Consultar</button>
+                <button class="btn mt-4 me-2" style="background-color: #3CB371;color: white;" @onclick="IniciarConsulta">Consultar</button>
 
                 @if (concursosInscritos != null && concursosInscritos.Any())
                 {
-                    <button class="btn btn-primary mt-4" @onclick="ImprimirSelecionado">Imprimir</button>
+                    <button class="btn mt-4" style="background-color: #DC143C;color: white" @onclick="ImprimirSelecionado">Imprimir</button>
                 }
 
 
