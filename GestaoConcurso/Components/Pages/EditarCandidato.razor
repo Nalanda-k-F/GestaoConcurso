@@ -1,0 +1,233 @@
+﻿@page "/editar"
+@using GestaoConcurso.Models
+@using GestaoConcurso.Controllers
+@inject CandidatoController candidatoControl
+@inject EstadoController estadoControl
+@inject CidadeController cidadeControl
+@inject EnderecoController enderecoControl
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3 class="text-center" style="color: black; font-weight: bold;">Editar Cadastro de Candidato</h3>
+
+<div class="d-flex justify-content-center">
+    <div style="width: 70%;">
+        <div class="p-4 border rounded shadow-lg bg-light">
+            <div class="mb-3">
+                <label for="cpfOuNome">CPF ou Nome do Candidato:</label>
+                <input type="text" id="cpfOuNome" class="form-control" @bind="cpfOuNomeBusca" placeholder="Digite CPF ou Nome" />
+                <button type="button" class="btn m-2" style="background-color: #CD5C5C;color: white" @onclick="BuscarCandidato">Buscar</button>
+            </div>
+
+            @if (candidato != null && candidato.Id > 0)
+            {
+                <div class="mb-3">
+                    <label for="nome">Nome do Candidato:</label>
+                    <input type="text" id="nome" class="form-control" value="@candidato.Nome" disabled />
+                </div>
+                <div class="mb-3">
+                    <label for="cpf">CPF do Candidato:</label>
+                    <input type="text" id="cpf" class="form-control" value="@candidato.Cpf" disabled />
+                </div>
+
+                <EditForm Model="@endereco" OnValidSubmit="Atualizar" class="mt-4">
+                    <DataAnnotationsValidator />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="estado">Estado:<span class="text-danger">*</span></label>
+                            <select id="estado" class="form-control" @onchange="AtualizarEstadoSelecionado" >
+                                <option value="">Selecione um Estado</option>
+                                @foreach (var item in estados)
+                                {
+                                    <option value="@item.Id">@item.Nome (@item.UF)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="cidade">Cidade:<span class="text-danger">*</span></label>
+                            <select id="cidade" class="form-control" @bind="cidadeIdSelecionada" disabled="@(cidadesFiltradas.Count == 0)">
+                                <option value="">Selecione a Cidade</option>
+                                @foreach (var cidadeItem in cidadesFiltradas)
+                                {
+                                    <option value="@cidadeItem.Id">@cidadeItem.Municipio</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="rua">Rua:</label>
+                            <InputText id="rua" @bind-Value="endereco.Rua" class="form-control" placeholder="Digite a rua" />
+                            <ValidationMessage For="@(() => endereco.Rua)" class="text-danger" />
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label for="numero">Número:</label>
+                            <InputText id="numero" @bind-Value="endereco.Numero" class="form-control" placeholder="Número" />
+                            <ValidationMessage For="@(() => endereco.Numero)" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bairro">Bairro:</label>
+                            <InputText id="bairro" @bind-Value="endereco.Bairro" class="form-control" placeholder="Bairro" />
+                            <ValidationMessage For="@(() => endereco.Bairro)" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="complemento">Complemento:</label>
+                            <InputText id="complemento" @bind-Value="endereco.Complemento" class="form-control" placeholder="Complemento" />
+                            <ValidationMessage For="@(() => endereco.Complemento)" />
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(mensagemErro))
+                    {
+                        <div class="alert alert-danger text-center">@mensagemErro</div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(mensagemSucesso))
+                    {
+                        <div class="alert alert-success text-center">@mensagemSucesso</div>
+                    }
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn" style="background-color: #3CB371;color: white;">
+                            Atualizar
+                        </button>
+                        <button type="button" class="btn" style="background-color: #DC143C;color: white" @onclick="CancelarEdicao">
+                            Cancelar
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .text-danger {
+        color: red;
+    }
+</style>
+
+@code {
+    public Candidato? candidato;
+    public Endereco? endereco;
+    public List<Estado> estados = new();
+    public List<Cidade> cidadesFiltradas = new();
+    string mensagemErro = string.Empty;
+    string mensagemSucesso = string.Empty;
+    public int EstadoSelecionado;
+    public int cidadeIdSelecionada;
+    string cpfOuNomeBusca = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            estados = await estadoControl.ListarEstados();
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Erro ao carregar dados: {ex.Message}";
+            EsconderMensagens();
+        }
+    }
+
+    public async Task BuscarCandidato()
+    {
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        if (!string.IsNullOrEmpty(cpfOuNomeBusca))
+        {
+            try
+            {
+                candidato = await candidatoControl.BuscarPorCpfOuNome(cpfOuNomeBusca);
+                if (candidato != null && candidato.Id > 0)
+                {
+                    endereco = await enderecoControl.BuscarEnderecoDoCandidato(candidato.Id);
+                    if (endereco != null)
+                    {
+                        EstadoSelecionado = (await cidadeControl.BuscarCidadePorId(endereco.CidadeId)).EstadoId;
+                        cidadeIdSelecionada = endereco.CidadeId;
+                        cidadesFiltradas = await cidadeControl.ListarTodasCidades(EstadoSelecionado);
+                    }
+                    else
+                    {
+                        endereco = new Endereco();
+                    }
+                }
+                else
+                {
+                    mensagemErro = "Candidato não encontrado.";
+                    candidato = null;
+                    endereco = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                mensagemErro = $"Erro ao buscar candidato: {ex.Message}";
+                candidato = null;
+                endereco = null;
+            }
+        }
+        else
+        {
+            candidato = null;
+            endereco = null;
+        }
+        StateHasChanged();
+    }
+
+    public async Task AtualizarEstadoSelecionado(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int estadoId))
+        {
+            EstadoSelecionado = estadoId;
+            cidadesFiltradas = await cidadeControl.ListarTodasCidades(EstadoSelecionado);
+            StateHasChanged();
+        }
+    }
+
+    private async Task Atualizar()
+    {
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        try
+        {
+            endereco.CidadeId = cidadeIdSelecionada;
+            await enderecoControl.AtualizarEndereco(candidato.Id, endereco);
+            mensagemSucesso = "Endereço atualizado com sucesso!";
+            EsconderMensagens();
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Erro ao atualizar endereço: {ex.Message}";
+            EsconderMensagens();
+        }
+    }
+
+    private void CancelarEdicao()
+    {
+        candidato = null;
+        endereco = null;
+        cpfOuNomeBusca = string.Empty;
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+    }
+    private async void EsconderMensagens()
+    {
+        await Task.Delay(3000);
+        mensagemErro = string.Empty;
+        mensagemSucesso = string.Empty;
+        StateHasChanged();
+    }
+ }

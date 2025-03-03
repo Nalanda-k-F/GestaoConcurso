@@ -311,7 +311,18 @@ new Cidade { Id = 189, Municipio = "Miracema do Tocantins", EstadoId = 27 }
         }
     }
 
-
+    public async Task<Cidade> BuscarCidadePorId(int cidadeId)
+    {
+        try
+        {
+            return await _context.Cidade.FindAsync(cidadeId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao buscar cidade por ID: {ex.Message}");
+            return null;
+        }
+    }
     public async Task<List<Cidade>> BuscarCidadesPorNome(string nome)
     {
         if (string.IsNullOrWhiteSpace(nome))

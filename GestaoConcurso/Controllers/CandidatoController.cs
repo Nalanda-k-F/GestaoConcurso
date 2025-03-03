@@ -96,7 +96,17 @@ namespace GestaoConcurso.Controllers
         {
             return await _context.Candidato.ToListAsync();
         }
-       
+
+        public async Task<Candidato> BuscarPorCpfOuNome(string cpfOuNome)
+        {
+            if (string.IsNullOrWhiteSpace(cpfOuNome))
+            {
+                return null;
+            }
+
+            return await _context.Candidato
+                .FirstOrDefaultAsync(c => c.Cpf == cpfOuNome || c.Nome.Contains(cpfOuNome));
+        }
 
 
         // Método para verificar se um candidato existe
